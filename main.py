@@ -1,6 +1,3 @@
-import pygame
-import sys
-
 # SUDOKU SOLVER
 # by NoePfister
 
@@ -12,32 +9,42 @@ def main():
 class Programm:
     def __init__(self):
         self.sudoku = [
-            [0,0,1,2,0,0,0,0,0],
-            [0,2,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0],
-            [0,1,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0],
+            [5, 3, 0, 0, 7, 0, 0, 0, 0],
+            [6, 0, 0, 1, 9, 5, 0, 0, 0],
+            [0, 9, 8, 0, 0, 0, 0, 6, 0],
+            [8, 0, 0, 0, 6, 0, 0, 0, 3],
+            [4, 0, 0, 8, 0, 3, 0, 0, 1],
+            [7, 0, 0, 0, 2, 0, 0, 0, 6],
+            [0, 6, 0, 0, 0, 0, 2, 8, 0],
+            [0, 0, 0, 4, 1, 9, 0, 0, 5],
+            [0, 0, 0, 0, 8, 0, 0, 7, 9],
         ]
-        self.solver = Solver(self.sudoku)
+
+        self.solver = Solver(self.sudoku,self)
 
 
     def solve(self):
-        self.solver.solve()
+        print(self.solver.solve())
 
-    def exit(self):
+    def exit(self, msg: str):
+        print(msg)
         sys.exit()
 
 class Solver:
-    def __init__(self, sudoku):
+    def __init__(self, sudoku, program):
         self.sudoku = sudoku
+        self.pos = [0,0]
 
 
-    def solve(self):
-        print(self.check_sudoku(self.sudoku))
+    def solve(self) -> list:
+        if not self.check_sudoku(self.sudoku):
+            self.program.exit("INVALID SUDOKU INPUT")
+
+        else:
+            self.solve()
+
+        return self.sudoku
+
 
     def check_sudoku(self, new_sudoku) -> bool:
         # Check sudoku
@@ -102,7 +109,43 @@ class Solver:
 
         return True
 
+    def solve(self):
+        iterations = 0
+        running = True
+        while running:
+            iterations += 1
+            if iterations %10000 == 0:
+                print(iterations)
+                print(running)
+            if self.check_solved(self.sudoku):
+                running = False
+                continue
+            elif self.sudoku[self.pos[0]][self.pos[1]] == 9:
+                self.back()
+                continue
+            else:
+                while not self.check_sudoku(self.sudoku):
+                    if self.sudoku[self.pos[0]][self.pos[1]] == 9:
+                        break
+                    self.sudoku[self.pos[0]][self.pos[1]] += 1
 
+
+    def back(self):
+        if self.pos[1] > 0:
+            self.pos[1] -= 1
+        else:
+            self.pos[0] -= 1
+            self.pos[1] = 8
+
+
+
+    def check_solved(self, sudoku) -> bool:
+        for i in range(9):
+            for j in range(9):
+                if sudoku[i][j] == 0:
+                    return False
+
+        return self.check_sudoku(sudoku)
 
     @staticmethod
     def check_group(group: list) -> bool:
