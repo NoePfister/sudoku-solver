@@ -4,8 +4,10 @@
             "type": "python",
             "name": "Run Main",
             "file": "main.py",
-            "arguments": ["main.py"],
+            "arguments": [
+                "main.py",
+                "-ea"
+            ],
         },
-        
     ]
 }
