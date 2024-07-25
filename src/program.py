@@ -11,8 +11,8 @@ class Programm:
 
         self.solver = Solver(self.sudoku, self.sudoku_input_original, self)
 
-    def solve(self):
-        pprint(self.solver.run())
+    def solve(self) -> list:
+        return self.solver.run()
 
     @staticmethod
     def exit(msg: str):

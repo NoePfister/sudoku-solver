@@ -15,6 +15,7 @@ class Solver:
             self.program.exit("INVALID SUDOKU INPUT")
 
         else:
+            print("START SOLVING")
             self.solve()
 
         return self.sudoku
