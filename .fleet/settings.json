@@ -1,6 +1,10 @@
 {
     "files.exclude": [
         "chatgpt.py",
-        ".git"
-    ]
+        ".git",
+        "*__pycache__"
+    ],
+    "excluded": [
+        "chatgpt.py"
+    ],
 }
