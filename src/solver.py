@@ -12,6 +12,7 @@ class Solver:
 
     def run(self) -> list:
         if not self.check_sudoku(self.sudoku):
+            
             self.program.exit("INVALID SUDOKU INPUT")
 
         else:

@@ -1,7 +1,7 @@
 import sys
 from pprint import pprint
 
-from src.solver import Solver
+from solver import Solver
 
 
 class Programm:
