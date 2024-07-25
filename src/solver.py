@@ -1,53 +1,5 @@
-# SUDOKU SOLVER
-# by NoePfister
 import sys
 import traceback
-from pprint import pprint
-
-sudoku = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9],
-]
-
-sudoku_original = [
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9],
-]
-
-
-def main():
-    programm = Programm(sudoku, sudoku_original)
-    programm.solve()
-
-
-class Programm:
-    def __init__(self, sudoku_input, sudoku_original_input):
-        self.sudoku = sudoku_input
-        self.sudoku_original_input = sudoku_original_input
-
-        self.solver = Solver(self.sudoku, self.sudoku_original_input, self)
-
-    def solve(self):
-        pprint(self.solver.run())
-
-    @staticmethod
-    def exit(msg: str):
-        print(msg)
-        sys.exit()
 
 
 class Solver:
@@ -137,8 +89,8 @@ class Solver:
 
         while True:
             iterations += 1
-            if iterations % 10000 == 0:
-                print(iterations)
+            # if iterations % 10000 == 0:
+            #     print(iterations)
 
             # print(self.check_sudoku(self.sudoku))
             # if self.check_sudoku(self.sudoku):
@@ -153,14 +105,14 @@ class Solver:
             # if the current pos is 9, then go back and continue the next loop
             elif self.sudoku[self.pos[0]][self.pos[1]] == 10:
                 self.sudoku[self.pos[0]][self.pos[1]] = 0
-                print("BACK")
+                # print("BACK")
                 self.back()
 
                 continue
 
             else:
 
-                print("FIND NEXT GOOD VALUE", self.pos)
+                # print("FIND NEXT GOOD VALUE", self.pos)
                 searching = True
                 # increase the value until it is a valid sudoku or skip,
                 # if the value is 9, which will be picked up in the next loop
@@ -174,13 +126,15 @@ class Solver:
                         searching = False
                         self.forward()
 
+        print(f'ITERATIONS: {iterations}')
+
     def back(self):
         if self.pos == [0, 0]:
-            print("Cant go back anymore!!!")
-            print(self.sudoku)
+            # print("Cant go back anymore!!!")
+            # print(self.sudoku)
             traceback.print_stack()
             sys.exit()
-        print(self.pos)
+        # print(self.pos)
 
         if self.pos[1] > 0:
             self.pos[1] -= 1
@@ -197,35 +151,33 @@ class Solver:
         if self.check_solved(self.sudoku):
             return
 
-        if self.pos[0] > 8:
-            print("POS[0] is bigger than 8!!!!!")
         if self.pos[1] < 8:
             self.pos[1] += 1
         else:
             self.pos[0] += 1
             self.pos[1] = 0
 
-        print(self.pos, "forward")
+        # print(self.pos, "forward")
 
         # if the new pos is given from the input, go back once more
         if self.sudoku[self.pos[0]][self.pos[1]] == self.sudoku_original[self.pos[0]][self.pos[1]]:
             if self.sudoku_original[self.pos[0]][self.pos[1]] == 0:
                 return
-            print("given number reached")
+            # print("given number reached")
             # check if last pos is reached:
             if self.pos == [8, 8]:
-                pprint("Last pos reached!!")
-                pprint(self.sudoku)
-                sys.exit()
+                # pprint("Last pos reached!!")
+                # pprint(self.sudoku)
+                return
             self.forward()
 
-    def check_solved(self, sudoku) -> bool:
+    def check_solved(self, _) -> bool:
         for i in range(9):
             for j in range(9):
-                if sudoku[i][j] == 0:
+                if self.sudoku[i][j] == 0:
                     return False
 
-        return self.check_sudoku(sudoku)
+        return self.check_sudoku(self.sudoku)
 
     @staticmethod
     def check_group(group: list) -> bool:
@@ -247,6 +199,3 @@ class Solver:
                 duplicates.append(group[i])
 
         return True
-
-
-main()
