@@ -4,7 +4,7 @@ from pprint import pprint
 from solver import Solver
 
 
-class Programm:
+class Program:
     def __init__(self, sudoku_input, sudoku_input_original):
         self.sudoku = sudoku_input
         self.sudoku_input_original = sudoku_input_original

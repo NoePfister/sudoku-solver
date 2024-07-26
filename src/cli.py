@@ -2,27 +2,57 @@ import copy
 import msvcrt
 import os
 import sys
-import traceback
-from pprint import pprint
 
-from program import Programm
+from program import Program
+
+
+class Colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 title_ascii = """ __   _     ___   ___   _     _         __   ___   _     _      ____  ___  
 ( (` | | | | | \ / / \ | |_/ | | |     ( (` / / \ | |   \ \  / | |_  | |_) 
 _)_) \_\_/ |_|_/ \_\_/ |_| \ \_\_/     _)_) \_\_/ |_|__  \_\/  |_|__ |_| \\"""
 
+def color_red(text):
+    return Colors.FAIL + text + Colors.ENDC
 
-def visualize(sudoku_input):
-    # convert to one list
+def visualize(sudoku_input, pos=None):
     list_sudoku = []
     for i in range(9):
         for j in range(9):
             list_sudoku.append(sudoku_input[i][j])
 
+
+
     q = lambda x, y: x + y + x + y + x
     r = lambda a, b, c, d, e: a + q(q(b * 3, c), d) + e + "\n"
-    print(((r(*"╔═╤╦╗") + q(q("║ %d │ %d │ %d " * 3 + "║\n", r(*"╟─┼╫╢")), r(*"╠═╪╬╣")) + r(*"╚═╧╩╝")) % eval(
-        str(tuple(list_sudoku)))).replace(*"0 "))
+    grid = (((r(*"╔═╤╦╗") + q(q("║ %s │ %s │ %s " * 3 + "║\n", r(*"╟─┼╫╢")), r(*"╠═╪╬╣")) + r(*"╚═╧╩╝")) % eval(
+        str(tuple(list_sudoku)))))
+
+
+
+    grid_array = grid.split("\n")
+
+    if pos is not None:
+        i = pos[0]*2+1
+        j = pos[1]*4+2
+
+
+        grid_array[i] = grid_array[i][:j] + color_red("_") + grid_array[i][j+1:]
+
+    grid = ""
+    for j in range(len(grid_array)):
+        grid += grid_array[j] + "\n"
+
+    print(grid)
 
 
 class CLI:
@@ -38,7 +68,9 @@ class CLI:
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
         ]
+        self.solved_sudoku: list = copy.deepcopy(self.sudoku_input)
         self.pos = [0, 0]
+        self.program: Program = None
 
     def start_cli(self):
 
@@ -70,10 +102,27 @@ class CLI:
 
 
     def quit(self):
+        print(Colors.ENDC)
         self.clear()
         sys.exit()
 
     def start_menu_loop(self):
+
+        self.sudoku_input: list = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        self.solved_sudoku: list = copy.deepcopy(self.sudoku_input)
+        self.pos = [0, 0]
+        self.program: Program = None
+
         while True:
             self.clear()
 
@@ -144,16 +193,27 @@ class CLI:
         self.sudoku_input[self.pos[0]][self.pos[1]] = value
         self.forward()
 
-    def forward(self):
+    def forward(self, pos=None) -> list:
+        if pos is None:
 
-        if self.pos == [8, 8]:
-            self.solve_sudoku_loop()
+            if self.pos == [8, 8]:
+                self.solve_sudoku_loop()
 
-        if self.pos[1] < 8:
-            self.pos[1] += 1
+            if self.pos[1] < 8:
+                self.pos[1] += 1
+            else:
+                self.pos[0] += 1
+                self.pos[1] = 0
         else:
-            self.pos[0] += 1
-            self.pos[1] = 0
+            if pos == [8, 8]:
+                return pos
+            if pos[1] < 8:
+                pos[1] += 1
+            else:
+                pos[0] += 1
+                pos[1] = 0
+
+        return pos
 
     def print_solve_sudoku(self):
 
@@ -162,21 +222,24 @@ class CLI:
         #       - (q) Quit -> EXIT PROGRAM
 
         # SOLVE SUDOKU HERE
-        programm = Programm(self.sudoku_input, copy.deepcopy(self.sudoku_input))
+        if not self.program:
+            self.program = Program(self.sudoku_input, copy.deepcopy(self.sudoku_input))
 
-        self.clear()
+            self.clear()
 
-        visualize(programm.solve())
+            self.solved_sudoku = self.program.solve()
+
+        visualize(self.solved_sudoku)
 
         print("\n\n\n")
         print("OPTIONS:")
-        print("    - (m) Main Menu")
-        print("    - (q) Quit")
+        print("    - (1) Main Menu")
+        print("    - (2) Quit")
 
     def print_input_sudoku(self):
         print("Input values one by one!")
         print('VALUES:')
-        pprint(self.sudoku_input)
+        visualize(self.sudoku_input, self.pos)
         print("OPTIONS:")
         print("    - (s) Solve Sudoku")
         print("    - (q) Quit")
@@ -200,9 +263,3 @@ class CLI:
         os.system("cls")
 
 
-def test_cli():
-    cli = CLI()
-    cli.start_cli()
-
-
-test_cli()
