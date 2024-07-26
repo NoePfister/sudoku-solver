@@ -4,5 +4,5 @@ A simple sudoku solver written in Python
 
 # Features
 
-- [ ] SOlve Sudokus using the backtracing algorithm
-- [ ] Input own sudoku to solve
+- [x] Solve Sudokus using the backtracing algorithm
+- [x] Input own sudoku to solve
