@@ -1,9 +1,19 @@
+"""
+The real Solver. It gets the Sudoku as an Input,
+and returns the solved sudoku.
+"""
+
 import sys
 import traceback
 
+import utils
+
 
 class Solver:
+    """The main class which houses the Solver."""
+
     def __init__(self, sudoku_input: list, sudoku_original_input, program):
+        """Initialise the variables"""
         self.sudoku = sudoku_input
         self.sudoku_original = sudoku_original_input
         # IMPORTANT: not working, lists are synced
@@ -11,17 +21,19 @@ class Solver:
         self.pos = [0, 0]
 
     def run(self) -> list:
+        """Run the Solver and return the solution"""
         if not self.check_sudoku(self.sudoku):
-            
+
             self.program.exit("INVALID SUDOKU INPUT")
 
         else:
-            print("START SOLVING")
+            # print("START SOLVING")
             self.solve()
 
         return self.sudoku
 
     def check_sudoku(self, new_sudoku) -> bool:
+        """Check if the inputted sudoku is valid."""
         # Check sudoku
 
         # POSSIBLE CASES:
@@ -84,6 +96,7 @@ class Solver:
         return True
 
     def solve(self):
+        """Start the solving loop."""
         # if the pos[0,0] is a given input, skip forward:
         if self.sudoku[0][0] != 0:
             self.forward()
@@ -103,34 +116,32 @@ class Solver:
                 print("SOLVED")
                 break
 
-
             # if the current pos is 9, then go back and continue the next loop
-            elif self.sudoku[self.pos[0]][self.pos[1]] == 10:
+            if self.sudoku[self.pos[0]][self.pos[1]] == 10:
                 self.sudoku[self.pos[0]][self.pos[1]] = 0
                 # print("BACK")
                 self.back()
 
                 continue
 
-            else:
+            # print("FIND NEXT GOOD VALUE", self.pos)
+            searching = True
+            # increase the value until it is a valid sudoku or skip,
+            # if the value is 9, which will be picked up in the next loop
+            # and the back function will be called
+            while searching:
 
-                # print("FIND NEXT GOOD VALUE", self.pos)
-                searching = True
-                # increase the value until it is a valid sudoku or skip,
-                # if the value is 9, which will be picked up in the next loop
-                # and the back function will be called
-                while searching:
-
-                    if self.sudoku[self.pos[0]][self.pos[1]] == 10:
-                        break
-                    self.sudoku[self.pos[0]][self.pos[1]] += 1
-                    if self.check_sudoku(self.sudoku):
-                        searching = False
-                        self.forward()
+                if self.sudoku[self.pos[0]][self.pos[1]] == 10:
+                    break
+                self.sudoku[self.pos[0]][self.pos[1]] += 1
+                if self.check_sudoku(self.sudoku):
+                    searching = False
+                    self.forward()
 
         print(f'ITERATIONS: {iterations}')
 
     def back(self):
+        """Bring the position back."""
         if self.pos == [0, 0]:
             # print("Cant go back anymore!!!")
             # print(self.sudoku)
@@ -149,15 +160,12 @@ class Solver:
                 self.back()
 
     def forward(self):
+        """Bring the position forward"""
         # check if sudoku is finished:
         if self.check_solved(self.sudoku):
             return
 
-        if self.pos[1] < 8:
-            self.pos[1] += 1
-        else:
-            self.pos[0] += 1
-            self.pos[1] = 0
+        self.pos = utils.forward(self.pos)
 
         # print(self.pos, "forward")
 
@@ -174,6 +182,7 @@ class Solver:
             self.forward()
 
     def check_solved(self, _) -> bool:
+        """Check if the Sudoku is solved."""
         for i in range(9):
             for j in range(9):
                 if self.sudoku[i][j] == 0:
@@ -183,6 +192,7 @@ class Solver:
 
     @staticmethod
     def check_group(group: list) -> bool:
+        """Check if the group violates any rules."""
 
         ints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0}
         group_set = set(group)
@@ -192,12 +202,12 @@ class Solver:
 
         # Check if there are double ints
         duplicates = []
-        for i in range(len(group)):
-            if group[i] == 0:
+        for _, num in enumerate(group):
+            if num == 0:
                 continue
-            elif group[i] in duplicates:
+            if num in duplicates:
                 return False
-            else:
-                duplicates.append(group[i])
+
+            duplicates.append(num)
 
         return True
