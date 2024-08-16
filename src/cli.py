@@ -1,12 +1,23 @@
+"""
+The Command Line Interface (CLI) of the Sudoku Solver.
+It manages the main loop of the application.
+"""
+import ast
 import copy
+import dataclasses
 import msvcrt
 import os
 import sys
 
+import utils
 from program import Program
 
 
+@dataclasses.dataclass
 class Colors:
+    """
+    The Colors to print in the terminal
+    """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
@@ -17,46 +28,55 @@ class Colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-title_ascii = """ __   _     ___   ___   _     _         __   ___   _     _      ____  ___  
+
+TITLE_ASCII = r""" __   _     ___   ___   _     _         __   ___   _     _      ____  ___
 ( (` | | | | | \ / / \ | |_/ | | |     ( (` / / \ | |   \ \  / | |_  | |_) 
 _)_) \_\_/ |_|_/ \_\_/ |_| \ \_\_/     _)_) \_\_/ |_|__  \_\/  |_|__ |_| \\"""
 
+
 def color_red(text):
+    """Returns the text with the colors,so it can be printed in the terminal."""
     return Colors.FAIL + text + Colors.ENDC
 
+
 def visualize(sudoku_input, pos=None):
+    """Visualize the Sudoku in a fancy grid."""
     list_sudoku = []
     for i in range(9):
         for j in range(9):
             list_sudoku.append(sudoku_input[i][j])
 
+    def q(x, y):
+        return x + y + x + y + x
 
+    def r(a, b, c, d, e):
+        return a + q(q(b * 3, c), d) + e + "\n"
 
-    q = lambda x, y: x + y + x + y + x
-    r = lambda a, b, c, d, e: a + q(q(b * 3, c), d) + e + "\n"
-    grid = (((r(*"╔═╤╦╗") + q(q("║ %s │ %s │ %s " * 3 + "║\n", r(*"╟─┼╫╢")), r(*"╠═╪╬╣")) + r(*"╚═╧╩╝")) % eval(
-        str(tuple(list_sudoku)))))
-
-
+    grid = (((r(*"╔═╤╦╗") + q(q("║ %s │ %s │ %s " * 3 + "║\n", r(*"╟─┼╫╢")), r(*"╠═╪╬╣")) +
+              r(*"╚═╧╩╝")) % ast.literal_eval(str(tuple(list_sudoku)))))
 
     grid_array = grid.split("\n")
 
     if pos is not None:
-        i = pos[0]*2+1
-        j = pos[1]*4+2
+        i = pos[0] * 2 + 1
+        j = pos[1] * 4 + 2
 
-
-        grid_array[i] = grid_array[i][:j] + color_red("_") + grid_array[i][j+1:]
+        grid_array[i] = grid_array[i][:j] + color_red("_") + grid_array[i][j + 1:]
 
     grid = ""
-    for j in range(len(grid_array)):
-        grid += grid_array[j] + "\n"
+    for i, line in enumerate(grid_array):
+        grid += line + "\n"
 
     print(grid)
 
 
 class CLI:
+    """
+    The main CLI class. This class executes the main Loop of the application.
+    """
+
     def __init__(self):
+        """Initialize the variables."""
         self.sudoku_input: list = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -70,9 +90,10 @@ class CLI:
         ]
         self.solved_sudoku: list = copy.deepcopy(self.sudoku_input)
         self.pos = [0, 0]
-        self.program: Program = None
+        self.program: Program = Program(self.sudoku_input, self.sudoku_input)
 
     def start_cli(self):
+        """Start the CLI"""
 
         # LOOP:
         # 1. START MENU
@@ -100,13 +121,14 @@ class CLI:
 
         self.start_menu_loop()
 
-
     def quit(self):
+        """Exit the CLI"""
         print(Colors.ENDC)
         self.clear()
         sys.exit()
 
     def start_menu_loop(self):
+        """Start the main menu loop."""
 
         self.sudoku_input: list = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -121,7 +143,7 @@ class CLI:
         ]
         self.solved_sudoku: list = copy.deepcopy(self.sudoku_input)
         self.pos = [0, 0]
-        self.program: Program = None
+        self.program: Program = Program(self.sudoku_input, self.sudoku_input)
 
         while True:
             self.clear()
@@ -139,6 +161,7 @@ class CLI:
                     continue
 
     def solve_sudoku_loop(self):
+        """Start the solve sudoku loop."""
         while True:
             self.clear()
             self.print_solve_sudoku()
@@ -154,6 +177,7 @@ class CLI:
                     continue
 
     def input_sudoku_loop(self):
+        """Start the input sudoku loop."""
         while True:
             self.clear()
 
@@ -190,32 +214,27 @@ class CLI:
                     continue
 
     def add_value(self, value: int) -> None:
+        """Add a value to the input_sudoku"""
         self.sudoku_input[self.pos[0]][self.pos[1]] = value
         self.forward()
 
     def forward(self, pos=None) -> list:
+        """Make the pos go forward"""
         if pos is None:
 
             if self.pos == [8, 8]:
                 self.solve_sudoku_loop()
 
-            if self.pos[1] < 8:
-                self.pos[1] += 1
-            else:
-                self.pos[0] += 1
-                self.pos[1] = 0
+            self.pos = utils.forward(self.pos)
         else:
             if pos == [8, 8]:
                 return pos
-            if pos[1] < 8:
-                pos[1] += 1
-            else:
-                pos[0] += 1
-                pos[1] = 0
+            pos = utils.forward(pos)
 
         return pos
 
     def print_solve_sudoku(self):
+        """Print the solve sudoku loop CLI."""
 
         #   OPTIONS
         #       - (m) Main Menu -> 1. START MENU
@@ -237,6 +256,7 @@ class CLI:
         print("    - (2) Quit")
 
     def print_input_sudoku(self):
+        """Print the input sudoku loop CLI."""
         print("Input values one by one!")
         print('VALUES:')
         visualize(self.sudoku_input, self.pos)
@@ -246,7 +266,8 @@ class CLI:
 
     @staticmethod
     def print_start_menu():
-        print(title_ascii)
+        """Print the start menu loop CLI."""
+        print(TITLE_ASCII)
         print("\n\n\n\n")
         print("OPTIONS:")
         print("    - (1) Solve Sudoku")
@@ -256,10 +277,10 @@ class CLI:
 
     @staticmethod
     def wait_for_input() -> bytes:
+        """Wait for key input and return it."""
         return msvcrt.getch()
 
     @staticmethod
     def clear():
+        """Clear the CLI."""
         os.system("cls")
-
-
