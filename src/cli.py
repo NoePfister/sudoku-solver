@@ -8,7 +8,6 @@ import dataclasses
 import msvcrt
 import os
 import sys
-import traceback
 from pprint import pprint
 
 import utils
