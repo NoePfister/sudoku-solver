@@ -8,6 +8,7 @@ import dataclasses
 import msvcrt
 import os
 import sys
+from pprint import pprint
 
 import utils
 from program import Program
@@ -88,7 +89,6 @@ class CLI:
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
         ]
-        self.solved_sudoku: list = copy.deepcopy(self.sudoku_input)
         self.pos = [0, 0]
         self.program: Program = Program(self.sudoku_input, self.sudoku_input)
 
@@ -220,10 +220,9 @@ class CLI:
 
     def forward(self, pos=None) -> list:
         """Make the pos go forward"""
-        if pos is None:
 
-            if self.pos == [8, 8]:
-                self.solve_sudoku_loop()
+        if self.pos == [8, 8]:
+            self.solve_sudoku_loop()
 
             self.pos = utils.forward(self.pos)
         else:
@@ -241,25 +240,22 @@ class CLI:
         #       - (q) Quit -> EXIT PROGRAM
 
         # SOLVE SUDOKU HERE
-        if not self.program:
-            self.program = Program(self.sudoku_input, copy.deepcopy(self.sudoku_input))
+        program = Program(self.sudoku_input, copy.deepcopy(self.sudoku_input))
 
-            self.clear()
+        self.clear()
 
-            self.solved_sudoku = self.program.solve()
-
-        visualize(self.solved_sudoku)
+        visualize(program.solve())
 
         print("\n\n\n")
         print("OPTIONS:")
-        print("    - (1) Main Menu")
-        print("    - (2) Quit")
+        print("    - (m) Main Menu")
+        print("    - (q) Quit")
 
     def print_input_sudoku(self):
         """Print the input sudoku loop CLI."""
         print("Input values one by one!")
         print('VALUES:')
-        visualize(self.sudoku_input, self.pos)
+        pprint(self.sudoku_input)
         print("OPTIONS:")
         print("    - (s) Solve Sudoku")
         print("    - (q) Quit")
@@ -284,3 +280,11 @@ class CLI:
     def clear():
         """Clear the CLI."""
         os.system("cls")
+
+
+def test_cli():
+    cli = CLI()
+    cli.start_cli()
+
+
+test_cli()

@@ -7,10 +7,6 @@ from solver import Solver
 
 
 class Program:
-    """
-    The main Program class, that starts the Solver.
-    It gets startet by the CLI class.
-    """
     def __init__(self, sudoku_input, sudoku_input_original):
         """Initialise variables"""
         self.sudoku = sudoku_input
